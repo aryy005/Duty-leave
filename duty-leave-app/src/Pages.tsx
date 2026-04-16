@@ -1,5 +1,4 @@
-import React from 'react';
-import { Mail, MapPin, Phone, ShieldCenter } from 'lucide-react';
+import { Mail, MapPin, Phone, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function About() {
@@ -119,7 +118,7 @@ export function Footer() {
          <Link to="/terms" className="nav-link">Terms of Service</Link>
       </div>
       <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.9rem'}}>
-         <ShieldCenter size={16}/> &copy; {new Date().getFullYear()} DutyLeave Hub. All rights reserved.
+         <ShieldCheck size={16}/> &copy; {new Date().getFullYear()} DutyLeave Hub. All rights reserved.
       </div>
     </footer>
   );
