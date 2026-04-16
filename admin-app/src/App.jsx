@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { ShieldCheck, Check, X, Building, AlertCircle, CalendarRange } from 'lucide-react';
 import './index.css';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 export default function App() {
   const [clubs, setClubs] = useState([]);
 
   React.useEffect(() => {
-    fetch('http://localhost:5000/api/clubs')
+    fetch(`${API_BASE}/clubs`)
       .then(res => res.json())
       .then(data => setClubs(data))
       .catch(err => console.error("Error fetching clubs:", err));
@@ -17,7 +19,7 @@ export default function App() {
 
   const handleAction = async (id, newStatus) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/clubs/${id}/status`, {
+      const res = await fetch(`${API_BASE}/clubs/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })

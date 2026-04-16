@@ -42,24 +42,50 @@ body {
 
 /* Animations */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.fade-in-up { 
-  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+
+.fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.slide-down { animation: slideDown 0.5s ease forwards; }
+
+.slide-down {
+  animation: slideDown 0.5s ease forwards;
+}
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
-.fade-in { animation: fadeIn 0.5s ease forwards; }
+
+.fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
 
 /* Utilities */
 .app-container {
@@ -80,10 +106,21 @@ a {
   display: inline-block;
 }
 
-.text-primary { color: var(--primary); }
-.text-secondary { color: var(--secondary); }
-.text-muted { color: var(--text-muted); }
-.font-medium { font-weight: 500; }
+.text-primary {
+  color: var(--primary);
+}
+
+.text-secondary {
+  color: var(--secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.font-medium {
+  font-weight: 500;
+}
 
 .glass-panel {
   background: rgba(255, 255, 255, 0.5);
@@ -95,7 +132,7 @@ a {
 @media (prefers-color-scheme: dark) {
   .glass-panel {
     background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(255,255,255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.05);
   }
 }
 
