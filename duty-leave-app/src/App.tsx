@@ -128,15 +128,34 @@ function StudentDashboard({ events, approvedClubs }) {
 
   const statusFilters = ['All', 'Open', 'Upcoming', 'Closed'];
 
+  // Helper to determine status dynamically based on date
+  const getSmartStatus = (event) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const eventDate = new Date(event.eventDate);
+    eventDate.setHours(0, 0, 0, 0);
+
+    if (eventDate.getTime() > today.getTime()) return 'Upcoming';
+    if (eventDate.getTime() === today.getTime()) return 'Open';
+    return 'Closed';
+  };
+
   const filteredEvents = events.filter(event => {
-    const matchStatus = statusFilter === 'All' ? true : event.status === statusFilter;
+    const smartStatus = getSmartStatus(event);
+    
+    // Status Filter logic
+    const matchStatus = statusFilter === 'All' ? true : smartStatus === statusFilter;
+    
+    // Stream Filter logic
     const matchStream = streamFilter === 'All Streams'
       ? true
       : event.streams.includes('All Streams') || event.streams.includes(streamFilter);
+    
+    // Club Filter logic
     const matchClub = clubFilter === 'All Clubs' ? true : event.society === clubFilter;
 
     return matchStatus && matchStream && matchClub;
-  });
+  }).sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
 
   const recentEvents = events.filter(e => {
     const uploadTime = new Date(e.createdAt || Date.now()).getTime();
@@ -144,10 +163,15 @@ function StudentDashboard({ events, approvedClubs }) {
   });
 
   const renderEventCard = (event) => {
+    const smartStatus = getSmartStatus(event);
     return (
       <div className="event-card fade-in-up" key={event._id} onClick={() => setSelectedEvent(event)} style={{ cursor: 'pointer' }}>
-        <div className="card-image-wrap">
-          <span className="event-status">{event.status}</span>
+        <div className="event-image">
+          <span className="event-status" style={{ 
+            background: smartStatus === 'Open' ? '#10b981' : (smartStatus === 'Upcoming' ? '#f59e0b' : '#64748b') 
+          }}>
+            {smartStatus === 'Open' ? 'Today' : smartStatus}
+          </span>
           <img src={event.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=600'} alt={event.title} />
         </div>
         <div className="event-content">
@@ -242,8 +266,13 @@ function StudentDashboard({ events, approvedClubs }) {
             <img src={selectedEvent.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'} alt={selectedEvent.title} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
             
             <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 2rem 0' }}>
-              <div style={{ display: 'inline-block', padding: '0.3rem 0.8rem', background: 'rgba(225, 29, 72,0.1)', color: '#e11d48', borderRadius: '99px', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.8rem' }}>
-                {selectedEvent.status}
+              <div style={{ 
+                display: 'inline-block', padding: '0.3rem 0.8rem', 
+                background: getSmartStatus(selectedEvent) === 'Open' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(225, 29, 72,0.1)', 
+                color: getSmartStatus(selectedEvent) === 'Open' ? '#10b981' : '#e11d48', 
+                borderRadius: '99px', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.8rem' 
+              }}>
+                {getSmartStatus(selectedEvent) === 'Open' ? 'Today' : getSmartStatus(selectedEvent)}
               </div>
               <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: '0 0 0.5rem', color: 'var(--text-main)' }}>{selectedEvent.title}</h2>
               <p className="text-primary font-medium" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '1.5rem', margin: 0 }}>
