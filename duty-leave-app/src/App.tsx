@@ -47,16 +47,15 @@ const GoogleAd = ({ slot, style = { display: 'block', textAlign: 'center' } }) =
   }, []);
 
   return (
-    <div className="glass-panel" style={{ margin: '2rem auto', padding: '1rem', overflow: 'hidden', minHeight: '100px', ...style }}>
+    <div className="ads-container" style={{ margin: '2rem auto', textAlign: 'center', width: '100%' }}>
       <ins
         className="adsbygoogle"
-        style={style}
+        style={{ ...style, minHeight: 'auto' }}
         data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" // Placeholder ID
         data-ad-slot={slot}
         data-ad-format="auto"
         data-full-width-responsive="true"
       ></ins>
-      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Advertisement</div>
     </div>
   );
 };
