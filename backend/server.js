@@ -18,6 +18,7 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // Health check
 app.get('/', (req, res) => res.json({ status: 'Duty Leave API is running 🚀' }));
 
+const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/duty-leave-hub';
 
 // --- Improved MongoDB Connection ---
