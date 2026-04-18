@@ -9,7 +9,7 @@ export function About() {
       <section style={{marginBottom: '3rem'}}>
         <h2 style={{display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.8rem', marginBottom: '1rem'}}><Globe className="text-primary"/> Our Global Vision</h2>
         <p style={{fontSize: '1.15rem', color: 'var(--text-muted)'}}>
-          Founded in 2024, DutyLeave Hub was born from a simple yet powerful observation: the most transformative learning happens outside the classroom. Whether it's a 48-hour hackathon, a national sports meet, or a cultural symphony, these moments define the university experience. Yet, students often find themselves penalized academically for pursuing these very opportunities due to outdated, paper-reliant attendance systems.
+          Founded in 2026, DutyLeave Hub was born from a simple yet powerful observation: the most transformative learning happens outside the classroom. Whether it's a 48-hour hackathon, a national sports meet, or a cultural symphony, these moments define the university experience. Yet, students often find themselves penalized academically for pursuing these very opportunities due to outdated, paper-reliant attendance systems.
         </p>
       </section>
 
