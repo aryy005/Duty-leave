@@ -70,38 +70,18 @@ export function Contact() {
       <h1 style={{fontSize: '2.5rem', marginBottom: '1.5rem', color: 'var(--primary)'}}>Contact Us</h1>
       <p style={{marginBottom: '2rem', color: 'var(--text-muted)'}}>We typically respond to support queries and partnership requests within 24-48 business hours.</p>
       
-      <div style={{display: 'flex', gap: '3rem', flexWrap: 'wrap'}}>
-         <div style={{flex: 1, minWidth: '300px'}}>
-           <div style={{display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem'}}>
-              <div style={{background: 'rgba(99,102,241,0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--primary)'}}><MapPin size={24}/></div>
-              <div>
-                 <h4 style={{margin: 0, fontSize: '1.1rem'}}>Corporate Office</h4>
-                 <p style={{margin: 0, color: 'var(--text-muted)'}}>123 Tech Campus Drive, Silicon Lane, CA 94000</p>
-              </div>
-           </div>
-           <div style={{display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem'}}>
-              <div style={{background: 'rgba(99,102,241,0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--primary)'}}><Phone size={24}/></div>
-              <div>
-                 <h4 style={{margin: 0, fontSize: '1.1rem'}}>Phone Line</h4>
-                 <p style={{margin: 0, color: 'var(--text-muted)'}}>+1 (555) 123-4567</p>
-              </div>
-           </div>
-           <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
-              <div style={{background: 'rgba(99,102,241,0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--primary)'}}><Mail size={24}/></div>
-              <div>
-                 <h4 style={{margin: 0, fontSize: '1.1rem'}}>Email Support</h4>
-                 <p style={{margin: 0, color: 'var(--text-muted)'}}>support@dutyleavehub.com</p>
-              </div>
-           </div>
+      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1.5rem', padding: '2rem 0'}}>
+         <div style={{background: 'rgba(225,29,72,0.1)', padding: '1.5rem', borderRadius: '50%', color: 'var(--primary)', width: 'fit-content'}}>
+            <Mail size={48}/>
          </div>
-
-         <div style={{flex: 1, minWidth: '300px'}}>
-           <form className="auth-form" onSubmit={(e) => { e.preventDefault(); alert('Message sent effectively to support team.'); }}>
-              <div className="form-group"><input type="text" className="form-control" placeholder="Your Name" required/></div>
-              <div className="form-group"><input type="email" className="form-control" placeholder="Your Email Address" required/></div>
-              <div className="form-group"><textarea className="form-control" style={{minHeight: '120px'}} placeholder="How can we help you?" required></textarea></div>
-              <button type="submit" className="btn btn-primary" style={{width: '100%'}}>Send Message</button>
-           </form>
+         <div>
+            <h4 style={{margin: '0 0 0.5rem 0', fontSize: '1.4rem'}}>Technical Support Email</h4>
+            <a href="mailto:findyourdlhere@gmail.com" style={{fontSize: '1.8rem', color: 'var(--primary)', textDecoration: 'none', fontWeight: 700}}>
+               findyourdlhere@gmail.com
+            </a>
+            <p style={{marginTop: '1rem', color: 'var(--text-muted)', fontSize: '1.1rem'}}>
+               Please reach out to us for any queries related to Duty Leave verification or platform access.
+            </p>
          </div>
       </div>
     </div>
