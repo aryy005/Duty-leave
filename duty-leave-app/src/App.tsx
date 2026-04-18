@@ -125,6 +125,7 @@ function StudentDashboard({ events, approvedClubs }) {
   const [streamFilter, setStreamFilter] = useState('All Streams');
   const [clubFilter, setClubFilter] = useState('All Clubs');
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [isZoomed, setIsZoomed] = useState(false);
 
   const statusFilters = ['All', 'Open', 'Upcoming', 'Closed'];
 
@@ -166,7 +167,7 @@ function StudentDashboard({ events, approvedClubs }) {
     const smartStatus = getSmartStatus(event);
     return (
       <div className="event-card fade-in-up" key={event._id} onClick={() => setSelectedEvent(event)} style={{ cursor: 'pointer' }}>
-        <div className="event-image">
+        <div className="card-image-wrap">
           <span className="event-status" style={{ 
             background: smartStatus === 'Open' ? '#10b981' : (smartStatus === 'Upcoming' ? '#f59e0b' : '#64748b') 
           }}>
@@ -179,15 +180,14 @@ function StudentDashboard({ events, approvedClubs }) {
           <h3 className="event-title">{event.title}</h3>
           <div className="stream-tags">
             {event.streams.map(stream => (
-              <span key={stream} className="stream-tag">{stream}</span>
+              <span key={stream} className="stream-tag" style={{ fontSize: '0.75rem' }}>{stream}</span>
             ))}
           </div>
           <p className="event-desc">{event.description}</p>
-          <div className="event-meta">
-            <div className="meta-item"><Calendar size={16} className="meta-icon" />{event.date} • {event.time}</div>
-            <div className="meta-item"><MapPin size={16} className="meta-icon" />{event.location}</div>
+          <div className="event-meta" style={{ marginTop: 'auto' }}>
+            <div className="meta-item" style={{ fontSize: '0.85rem' }}><Calendar size={14} className="meta-icon" />{event.date}</div>
+            <div className="meta-item" style={{ fontSize: '0.85rem' }}><MapPin size={14} className="meta-icon" />{event.location}</div>
           </div>
-
         </div>
       </div>
     );
@@ -256,60 +256,72 @@ function StudentDashboard({ events, approvedClubs }) {
         </div>
       )}
       
+      {isZoomed && selectedEvent && (
+        <div className="lightbox" onClick={() => setIsZoomed(false)}>
+          <button className="lightbox-close" style={{ position: 'fixed', top: '30px', right: '30px', background: 'white', color: 'black', border: 'none', borderRadius: '50%', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <X size={32} />
+          </button>
+          <img src={selectedEvent.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'} alt="Full poster" />
+        </div>
+      )}
+      
       {selectedEvent && (
-        <div className="modal-overlay fade-in" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'var(--bg-color)', zIndex: 1000, overflowY: 'auto' }}>
-          <div className="modal-content fade-in-up" style={{ minHeight: '100vh', width: '100%', position: 'relative', paddingBottom: '4rem' }}>
-            <button onClick={() => setSelectedEvent(null)} style={{ position: 'fixed', top: '20px', right: '20px', background: 'rgba(0,0,0,0.6)', color: 'white', border: 'none', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10, transition: 'background 0.2s', backdropFilter: 'blur(4px)' }} onMouseOver={e => e.currentTarget.style.background='rgba(0,0,0,0.8)'} onMouseOut={e => e.currentTarget.style.background='rgba(0,0,0,0.6)'}>
+        <div className="modal-overlay fade-in" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={(e) => {
+          if (e.target === e.currentTarget) setSelectedEvent(null);
+        }}>
+          <div className="compact-modal fade-in-up" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setSelectedEvent(null)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'rgba(0,0,0,0.05)', color: 'var(--text-main)', border: 'none', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 11, transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.background='rgba(0,0,0,0.1)'} onMouseOut={e => e.currentTarget.style.background='rgba(0,0,0,0.05)'}>
               <X size={24} />
             </button>
             
-            <img src={selectedEvent.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'} alt={selectedEvent.title} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
-            
-            <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 2rem 0' }}>
-              <div style={{ 
-                display: 'inline-block', padding: '0.3rem 0.8rem', 
-                background: getSmartStatus(selectedEvent) === 'Open' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(225, 29, 72,0.1)', 
-                color: getSmartStatus(selectedEvent) === 'Open' ? '#10b981' : '#e11d48', 
-                borderRadius: '99px', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.8rem' 
-              }}>
-                {getSmartStatus(selectedEvent) === 'Open' ? 'Today' : getSmartStatus(selectedEvent)}
+            <div className="modal-poster-side" onClick={() => setIsZoomed(true)}>
+              <img src={selectedEvent.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'} alt={selectedEvent.title} />
+              <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.6)', color: 'white', padding: '0.4rem 0.8rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 500, pointerEvents: 'none', backdropFilter: 'blur(4px)', opacity: 0.8 }}>
+                Click to expand image
               </div>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: '0 0 0.5rem', color: 'var(--text-main)' }}>{selectedEvent.title}</h2>
-              <p className="text-primary font-medium" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '1.5rem', margin: 0 }}>
-                <Building size={16} /> {selectedEvent.society}
+            </div>
+            
+            <div className="modal-info-side">
+              <div style={{ display: 'inline-block', alignSelf: 'flex-start', padding: '0.3rem 0.8rem', background: getSmartStatus(selectedEvent) === 'Open' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(225, 29, 72,0.1)', color: getSmartStatus(selectedEvent) === 'Open' ? '#10b981' : '#e11d48', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 700, marginBottom: '1rem' }}>
+                {getSmartStatus(selectedEvent) === 'Open' ? 'Live Today' : getSmartStatus(selectedEvent)}
+              </div>
+              
+              <h2 style={{ fontSize: '2rem', fontWeight: 800, margin: '0 0 0.25rem', color: 'var(--text-main)', letterSpacing: '-0.02em' }}>{selectedEvent.title}</h2>
+              <p style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 600, fontSize: '1rem', marginBottom: '2rem' }}>
+                <Building size={18} /> {selectedEvent.society}
               </p>
               
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', padding: '1.25rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: '12px', margin: '1.5rem 0' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
-                  <Calendar size={18} style={{ color: 'var(--text-muted)', marginTop: '2px' }} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <Calendar className="text-muted" size={20} style={{ marginTop: '2px' }} />
                   <div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Date &amp; Time</div>
-                    <div className="font-medium">{selectedEvent.date}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>When</div>
+                    <div style={{ fontWeight: 600 }}>{selectedEvent.date}</div>
                     <div style={{ fontSize: '0.9rem' }}>{selectedEvent.time}</div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
-                  <MapPin size={18} style={{ color: 'var(--text-muted)', marginTop: '2px' }} />
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <MapPin className="text-muted" size={20} style={{ marginTop: '2px' }} />
                   <div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Location</div>
-                    <div className="font-medium">{selectedEvent.location}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Where</div>
+                    <div style={{ fontWeight: 600 }}>{selectedEvent.location}</div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
-                  <Users size={18} style={{ color: 'var(--text-muted)', marginTop: '2px' }} />
+                <div style={{ display: 'flex', gap: '0.75rem', gridColumn: 'span 2' }}>
+                  <Users className="text-muted" size={20} style={{ marginTop: '2px' }} />
                   <div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Eligible Streams</div>
-                    <div className="font-medium">{selectedEvent.streams.join(', ')}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Eligible Target</div>
+                    <div style={{ fontWeight: 600 }}>{selectedEvent.streams.join(', ')}</div>
                   </div>
                 </div>
               </div>
               
-              <div style={{ marginBottom: '2rem' }}>
-                <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.8rem' }}>About this Event</h4>
-                <p style={{ lineHeight: '1.7', color: 'var(--text-muted)' }}>{selectedEvent.description}</p>
+              <div style={{ flexGrow: 1, marginBottom: '2rem' }}>
+                <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.75rem' }}>About this Event</h4>
+                <p style={{ lineHeight: '1.6', color: 'var(--text-muted)', fontSize: '1rem' }}>{selectedEvent.description}</p>
               </div>
               
-              <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
+              <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end', gap: '1rem', borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>
                 <button 
                   className="btn btn-primary" 
                   onClick={async () => {
@@ -330,8 +342,8 @@ function StudentDashboard({ events, approvedClubs }) {
                       window.open(imgUrl, '_blank');
                     }
                   }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.8rem 1.5rem' }}>
-                  <Download size={18} /> Download
+                  style={{ padding: '0.9rem 2rem' }}>
+                  <Download size={20} /> Download Poster
                 </button>
               </div>
             </div>
@@ -341,6 +353,7 @@ function StudentDashboard({ events, approvedClubs }) {
     </main>
   );
 }
+
 
 
 
