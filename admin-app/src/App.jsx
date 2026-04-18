@@ -446,7 +446,7 @@ function Dashboard({ token, onLogout }) {
                       <option>Platform News</option>
                       <option>Tech Update</option>
                       <option>Important Alert</option>
-                    </option>
+                    </select>
                   </div>
                   <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                     <label>Content Details</label>
