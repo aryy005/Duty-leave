@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const Club = require('./models/Club');
 const Event = require('./models/Event');
+const News = require('./models/News');
 const cron = require('node-cron');
 const jwt = require('jsonwebtoken');
 
@@ -165,6 +166,37 @@ app.delete('/api/events/:id', async (req, res) => {
   }
 });
 
+
+// --- News Endpoints ---
+
+app.get('/api/news', async (req, res) => {
+  try {
+    const news = await News.find().sort({ createdAt: -1 });
+    res.json(news);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/news', requireAdmin, async (req, res) => {
+  try {
+    const newNews = new News(req.body);
+    await newNews.save();
+    res.status(201).json(newNews);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/news/:id', requireAdmin, async (req, res) => {
+  try {
+    const deleted = await News.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'News item not found' });
+    res.json({ message: 'News item deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Duty Leave API running on http://localhost:${PORT}`);

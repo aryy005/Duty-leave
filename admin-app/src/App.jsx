@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ShieldCheck, Check, X, Building, AlertCircle, CalendarRange, LogOut, Lock, User, Eye, EyeOff, PlusCircle, Trash2, Calendar, Users, Download, List } from 'lucide-react';
+import { ShieldCheck, Check, X, Building, AlertCircle, CalendarRange, LogOut, Lock, User, Eye, EyeOff, PlusCircle, Trash2, Calendar, Users, Download, List, Newspaper } from 'lucide-react';
 import './index.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -149,6 +149,7 @@ const compressImage = (file, maxWidth = 900) => {
 function Dashboard({ token, onLogout }) {
   const [clubs, setClubs] = useState([]);
   const [events, setEvents] = useState([]);
+  const [news, setNews] = useState([]);
   const [activeTab, setActiveTab] = useState('Clubs');
   const [filterClub, setFilterClub] = useState('All');
   const [formData, setFormData] = useState({
@@ -178,6 +179,11 @@ function Dashboard({ token, onLogout }) {
       .then(res => res.json())
       .then(data => { if (data) setEvents(data); })
       .catch(err => console.error('Error fetching events:', err));
+
+    fetch(`${API_BASE}/news`)
+      .then(res => res.json())
+      .then(data => { if (data) setNews(data); })
+      .catch(err => console.error('Error fetching news:', err));
   }, []);
 
   const pendingClubs  = clubs.filter(c => c.status === 'Pending');
@@ -298,6 +304,7 @@ function Dashboard({ token, onLogout }) {
         <nav className="side-nav">
           <button onClick={() => setActiveTab('Clubs')} className={`nav-item ${activeTab === 'Clubs' ? 'active' : ''}`} style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '1rem', color: 'inherit' }}><Building size={20} /> Club Verification</button>
           <button onClick={() => setActiveTab('Events')} className={`nav-item ${activeTab === 'Events' ? 'active' : ''}`} style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '1rem', color: 'inherit' }}><CalendarRange size={20} /> Global Events</button>
+          <button onClick={() => setActiveTab('News')} className={`nav-item ${activeTab === 'News' ? 'active' : ''}`} style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '1rem', color: 'inherit' }}><Newspaper size={20} /> Manage News</button>
           <button onClick={() => setActiveTab('History')} className={`nav-item ${activeTab === 'History' ? 'active' : ''}`} style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '1rem', color: 'inherit' }}><List size={20} /> DL History (Export)</button>
           <button onClick={() => setActiveTab('CreateEvent')} className={`nav-item ${activeTab === 'CreateEvent' ? 'active' : ''}`} style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '1rem', color: 'inherit' }}><PlusCircle size={20} /> Upload DL</button>
         </nav>
@@ -311,8 +318,8 @@ function Dashboard({ token, onLogout }) {
       <main className="main-content">
         <header className="page-header">
           <div>
-            <h1>{activeTab === 'Clubs' ? 'Verification Dashboard' : activeTab === 'Events' ? 'Global Events Manager' : activeTab === 'History' ? 'Platform DL History' : 'Upload Administrative DL'}</h1>
-            <p>{activeTab === 'Clubs' ? 'Review and securely approve new club registrations.' : activeTab === 'Events' ? 'Force-manage and delete active Duty Leaves.' : activeTab === 'History' ? 'View tabular histories and export records to Excel.' : 'Create an event mapped to any approved society.'}</p>
+            <h1>{activeTab === 'Clubs' ? 'Verification Dashboard' : activeTab === 'Events' ? 'Global Events Manager' : activeTab === 'News' ? 'Broadcast Management' : activeTab === 'History' ? 'Platform DL History' : 'Upload Administrative DL'}</h1>
+            <p>{activeTab === 'Clubs' ? 'Review and securely approve new club registrations.' : activeTab === 'Events' ? 'Force-manage and delete active Duty Leaves.' : activeTab === 'News' ? 'Post the latest university news and important alerts.' : activeTab === 'History' ? 'View tabular histories and export records to Excel.' : 'Create an event mapped to any approved society.'}</p>
           </div>
           <div className="admin-profile">
             <ShieldCheck size={16} /> Super Admin
@@ -404,6 +411,82 @@ function Dashboard({ token, onLogout }) {
             </div>
             {events.length === 0 && <div className="empty-state">No duty leaves have been posted on the platform yet.</div>}
           </section>
+        )}
+
+        {activeTab === 'News' && (
+          <div className="fade-in">
+            <section className="dashboard-section">
+              <div className="admin-card" style={{ maxWidth: '600px', marginBottom: '3rem', padding: '2rem' }}>
+                <h2 style={{ marginBottom: '1.5rem', fontSize: '1.3rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><PlusCircle size={20} className="text-primary"/> Post New Announcement</h2>
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  const form = e.target;
+                  const newItem = {
+                    title: form.title.value,
+                    category: form.category.value,
+                    content: form.content.value,
+                    date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+                  };
+                  const res = await fetch(`${API_BASE}/news`, {
+                    method: 'POST', headers: authHeaders, body: JSON.stringify(newItem)
+                  });
+                  if (res.ok) {
+                    const data = await res.json();
+                    setNews([data, ...news]);
+                    form.reset();
+                  }
+                }}>
+                  <div className="form-group" style={{ marginBottom: '1rem' }}>
+                    <label>Title</label>
+                    <input name="title" type="text" className="form-control" required />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: '1rem' }}>
+                    <label>Category</label>
+                    <select name="category" className="form-control">
+                      <option>Platform News</option>
+                      <option>Tech Update</option>
+                      <option>Important Alert</option>
+                    </option>
+                  </div>
+                  <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                    <label>Content Details</label>
+                    <textarea name="content" className="form-control" style={{ minHeight: '100px' }} required></textarea>
+                  </div>
+                  <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Broadcast to Students</button>
+                </form>
+              </div>
+
+              <h2 className="section-title">Active Announcements ({news.length})</h2>
+              <div className="table-container">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Category</th>
+                      <th>Headline</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {news.map(item => (
+                      <tr key={item._id}>
+                        <td style={{ whiteSpace: 'nowrap' }}>{item.date}</td>
+                        <td><span className="badge badge-primary">{item.category}</span></td>
+                        <td className="font-medium">{item.title}</td>
+                        <td>
+                          <button onClick={async () => {
+                            if (!window.confirm('Delete this announcement?')) return;
+                            const res = await fetch(`${API_BASE}/news/${item._id}`, { method: 'DELETE', headers: authHeaders });
+                            if (res.ok) setNews(news.filter(n => n._id !== item._id));
+                          }} className="btn-text" style={{ color: '#ef4444' }}>Delete</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
         )}
 
         {activeTab === 'History' && (

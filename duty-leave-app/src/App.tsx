@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate, Navigate, useParams } from 'react-router-dom';
-import { Calendar, MapPin, Search, Clock, Users, ArrowRight, User, Building, LogIn, PlusCircle, Pencil, Trash2, X, Download } from 'lucide-react';
+import { Calendar, MapPin, Search, Clock, Users, ArrowRight, User, Building, LogIn, PlusCircle, Pencil, Trash2, X, Download, Newspaper, ExternalLink } from 'lucide-react';
 import './index.css';
 import { About, Privacy, Terms, Contact, Footer, News } from './Pages';
 
@@ -57,6 +57,32 @@ const GoogleAd = ({ slot, style = { display: 'block', textAlign: 'center' } }) =
         data-full-width-responsive="true"
       ></ins>
       <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Advertisement</div>
+    </div>
+  );
+};
+
+const NewsPopup = ({ latestNews, onClose }) => {
+  if (!latestNews) return null;
+
+  return (
+    <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }}>
+      <div className="modal-content glass-panel fade-in-up" style={{ maxWidth: '500px', border: '1px solid var(--primary)', padding: '2.5rem', textAlign: 'center' }}>
+        <button onClick={onClose} className="close-btn" style={{ top: '1rem', right: '1rem' }}><X size={20}/></button>
+        <div style={{ background: 'rgba(225,29,72,0.1)', color: 'var(--primary)', padding: '1rem', borderRadius: '50%', width: 'fit-content', margin: '0 auto 1.5rem auto' }}>
+          <Newspaper size={32}/>
+        </div>
+        <span style={{ background: 'rgba(225,29,72,0.1)', color: 'var(--primary)', padding: '0.4rem 1rem', borderRadius: '50px', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+          {latestNews.category}
+        </span>
+        <h2 style={{ fontSize: '2rem', margin: '1rem 0', fontWeight: 800 }}>{latestNews.title}</h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '2rem', lineHeight: '1.6' }}>
+          {latestNews.content}
+        </p>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button className="btn btn-primary" style={{ flex: 1 }} onClick={onClose}>Got it!</button>
+          <Link to="/news" className="btn btn-outline" style={{ flex: 1 }} onClick={onClose}>See All News</Link>
+        </div>
+      </div>
     </div>
   );
 };
@@ -290,7 +316,7 @@ function StudentDashboard({ events, approvedClubs }) {
 
 
 
-function StudentApp({ events, approvedClubs }) {
+function StudentApp({ events, approvedClubs, news }) {
   return (
     <>
       <Navbar role="student" />
@@ -300,7 +326,7 @@ function StudentApp({ events, approvedClubs }) {
         <Route path="/about" element={<About />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
-        <Route path="/news" element={<News />} />
+        <Route path="/news" element={<News initialNews={news} />} />
         <Route path="/contact" element={<Contact />} />
       </Routes>
     </>
@@ -839,6 +865,8 @@ export default function App() {
   const [events, setEvents] = useState([]);
   const [currentClub, setCurrentClub] = useState(null);
   const [approvedClubs, setApprovedClubs] = useState([]);
+  const [news, setNews] = useState([]);
+  const [latestNewsForPopup, setLatestNewsForPopup] = useState(null);
 
   useEffect(() => {
     fetch(`${API_BASE}/events`)
@@ -850,6 +878,20 @@ export default function App() {
       .then(res => res.json())
       .then(data => setApprovedClubs(data.filter(c => c.status === 'Approved')))
       .catch(err => console.error("Error fetching clubs:", err));
+
+    fetch(`${API_BASE}/news`)
+      .then(res => res.json())
+      .then(data => {
+        setNews(data);
+        if (data && data.length > 0) {
+          const latest = data[0];
+          const lastSeenId = localStorage.getItem('dl_last_news_id');
+          if (latest.isPopup && lastSeenId !== latest._id) {
+            setLatestNewsForPopup(latest);
+          }
+        }
+      })
+      .catch(err => console.error("Error fetching news:", err));
   }, []);
 
   const addEvent    = (newEvent)      => setEvents([newEvent, ...events]);
@@ -859,9 +901,18 @@ export default function App() {
   return (
     <Router>
       <div className="app-container">
+        {latestNewsForPopup && (
+          <NewsPopup 
+            latestNews={latestNewsForPopup} 
+            onClose={() => {
+              localStorage.setItem('dl_last_news_id', latestNewsForPopup._id);
+              setLatestNewsForPopup(null);
+            }} 
+          />
+        )}
         <Routes>
           <Route path="/club/*" element={<ClubApp events={events} currentClub={currentClub} setCurrentClub={setCurrentClub} addEvent={addEvent} updateEvent={updateEvent} deleteEvent={deleteEvent} />} />
-          <Route path="/*" element={<StudentApp events={events} approvedClubs={approvedClubs} />} />
+          <Route path="/*" element={<StudentApp events={events} approvedClubs={approvedClubs} news={news} />} />
         </Routes>
         <GoogleAd slot="footer-auto-ad" style={{ maxWidth: '1000px', marginTop: '3rem' }} />
         <Footer />

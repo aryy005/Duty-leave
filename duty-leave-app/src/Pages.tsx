@@ -117,44 +117,22 @@ export function Terms() {
   );
 }
 
-export function News() {
-  const articles = [
-    {
-      id: 1,
-      title: "DutyLeave HUB scaling to 5,000+ Active Students",
-      date: "April 15, 2026",
-      category: "Platform News",
-      excerpt: "We are thrilled to announce that DutyLeave Hub has surpassed its Q1 target of 5,000 active student users. Our data shows a 40% increase in society-led event participation since digitizing the leave approval process."
-    },
-    {
-      id: 2,
-      title: "New Enhanced Image Compression Engine Deployed",
-      date: "April 12, 2026",
-      category: "Tech Update",
-      excerpt: "To support our growing library of event posters, we've deployed a new client-side Canvas compression algorithm. This reduces event load times by 75% while keeping posters crisp for high-DPI displays."
-    },
-    {
-      id: 3,
-      title: "Society Verification: A New Standard for Excellence",
-      date: "April 10, 2026",
-      category: "Policy",
-      excerpt: "Our Administrative 'God Mode' now features enhanced society verification. Only faculty-approved clubs can now issue digital duty leaves, ensuring that academic integrity remains our number one priority."
-    },
-    {
-      id: 4,
-      title: "Spring Semester Tech Summit Announced",
-      date: "April 08, 2026",
-      category: "Upcoming Events",
-      excerpt: "The annual Spring Tech Summit is coming! Expect over 20+ workshops and a 24-hour hackathon. Digital duty leaves will be issued automatically for all verified registrations via the platform."
-    },
-    {
-      id: 5,
-      title: "Sustainable Campus Initiative Partnership",
-      date: "April 05, 2026",
-      category: "Partnership",
-      excerpt: "DutyLeave Hub is partnering with the Campus Green Committee to track attendance for the upcoming Tree Plantation drive. Earn academic credits while making your campus greener!"
+export function News({ initialNews = [] }) {
+  const [news, setNews] = useState(initialNews);
+  const [loading, setLoading] = useState(news.length === 0);
+
+  useEffect(() => {
+    if (initialNews.length === 0) {
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      fetch(`${API_BASE}/news`)
+        .then(res => res.json())
+        .then(data => {
+          setNews(data);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
     }
-  ];
+  }, [initialNews]);
 
   return (
     <div className="fade-in" style={{maxWidth: '1000px', margin: '2rem auto', padding: '0 1.5rem'}}>
@@ -164,8 +142,11 @@ export function News() {
       </div>
 
       <div style={{display: 'grid', gap: '2rem'}}>
-        {articles.map((article, i) => (
-          <article key={article.id} className="glass-panel fade-in-up" style={{padding: '2.5rem', borderRadius: '20px', transition: 'transform 0.3s ease', animationDelay: `${i * 0.1}s`}}>
+        {loading && <div className="glass-panel" style={{padding: '3rem', textAlign: 'center'}}>Syncing latest news...</div>}
+        {!loading && news.length === 0 && <div className="glass-panel" style={{padding: '3rem', textAlign: 'center'}}>No announcements found. Stay tuned!</div>}
+        
+        {news.map((article, i) => (
+          <article key={article._id || i} className="glass-panel fade-in-up" style={{padding: '2.5rem', borderRadius: '20px', transition: 'transform 0.3s ease', animationDelay: `${i * 0.1}s`}}>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem'}}>
               <div>
                 <span style={{background: 'rgba(225,29,72,0.1)', color: 'var(--primary)', padding: '0.4rem 1rem', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em'}}>
@@ -176,7 +157,7 @@ export function News() {
               <time style={{color: 'var(--text-muted)', fontSize: '0.95rem', fontWeight: 500}}>{article.date}</time>
             </div>
             <p style={{fontSize: '1.1rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: '1.7'}}>
-              {article.excerpt}
+              {article.content}
             </p>
             <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 600, cursor: 'pointer'}}>
               Read Full Article <ExternalLink size={16}/>
