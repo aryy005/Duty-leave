@@ -5,7 +5,9 @@ require('dotenv').config();
 
 const Club = require('./models/Club');
 const Event = require('./models/Event');
-const Participation = require('./models/Participation');
+const cron = require('node-cron');
+const jwt = require('jsonwebtoken');
+
 
 const app = express();
 app.use(cors({ origin: '*' }));
@@ -19,8 +21,58 @@ const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/duty-leave-hub';
 
 mongoose.connect(MONGO_URI)
-  .then(() => console.log('MongoDB successfully connected'))
+  .then(() => {
+    console.log('MongoDB successfully connected');
+
+    // --- Auto-delete events 4 days after their event date ---
+    // Runs every day at midnight (00:00)
+    cron.schedule('0 0 * * *', async () => {
+      try {
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 4);
+        const result = await Event.deleteMany({ eventDate: { $lte: cutoff } });
+        if (result.deletedCount > 0) {
+          console.log(`[Cron] Auto-deleted ${result.deletedCount} expired event(s) (older than 4 days).`);
+        }
+      } catch (err) {
+        console.error('[Cron] Error during auto-delete:', err);
+      }
+    });
+    console.log('[Cron] Auto-delete scheduler started (runs daily at midnight).');
+  })
   .catch(err => console.error('MongoDB connection error:', err));
+
+// --- Admin Auth Middleware ---
+
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
+
+function requireAdmin(req, res, next) {
+  const auth = req.headers['authorization'];
+  if (!auth || !auth.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized: No token provided' });
+  }
+  const token = auth.split(' ')[1];
+  try {
+    jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    return res.status(403).json({ error: 'Forbidden: Invalid or expired token' });
+  }
+}
+
+// --- Admin Login ---
+
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body;
+  if (
+    username === process.env.ADMIN_USERNAME &&
+    password === process.env.ADMIN_PASSWORD
+  ) {
+    const token = jwt.sign({ role: 'admin' }, JWT_SECRET, { expiresIn: '8h' });
+    return res.json({ token });
+  }
+  return res.status(401).json({ error: 'Invalid admin credentials' });
+});
 
 // --- Auth Endpoints ---
 
@@ -62,7 +114,7 @@ app.get('/api/clubs', async (req, res) => {
   }
 });
 
-app.patch('/api/clubs/:id/status', async (req, res) => {
+app.patch('/api/clubs/:id/status', requireAdmin, async (req, res) => {
   try {
     const { status } = req.body;
     const club = await Club.findByIdAndUpdate(req.params.id, { status }, { new: true });
@@ -93,35 +145,26 @@ app.post('/api/events', async (req, res) => {
   }
 });
 
-// --- Participation Endpoints ---
-
-app.get('/api/participations/:studentId', async (req, res) => {
+app.put('/api/events/:id', async (req, res) => {
   try {
-    const participations = await Participation.find({ studentId: req.params.studentId });
-    res.json(participations);
+    const updated = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!updated) return res.status(404).json({ error: 'Event not found' });
+    res.json(updated);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-app.post('/api/participations', async (req, res) => {
+app.delete('/api/events/:id', async (req, res) => {
   try {
-    const { studentId, eventId } = req.body;
-    
-    // Toggle logic: If exists, remove it. If not, add it.
-    const existing = await Participation.findOne({ studentId, eventId });
-    if (existing) {
-      await Participation.findByIdAndDelete(existing._id);
-      return res.json({ action: 'removed', eventId });
-    } else {
-      const newPart = new Participation({ studentId, eventId });
-      await newPart.save();
-      return res.status(201).json({ action: 'added', eventId });
-    }
+    const deleted = await Event.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'Event not found' });
+    res.json({ message: 'Event deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 app.listen(PORT, () => {
   console.log(`Duty Leave API running on http://localhost:${PORT}`);
