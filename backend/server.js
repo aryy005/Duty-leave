@@ -15,6 +15,20 @@ app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
+// --- Smart Caching Engine ---
+const cacheStore = {
+  events: null,
+  news: null,
+  lastUpdate: { events: 0, news: 0 }
+};
+const CACHE_TTL = 30000; // 30 seconds
+
+const clearCache = (type) => {
+  cacheStore[type] = null;
+  cacheStore.lastUpdate[type] = 0;
+  console.log(`[Cache] Cleared ${type} cache due to mutation.`);
+};
+
 // Health check
 app.get('/', (req, res) => res.json({ status: 'Duty Leave API is running 🚀' }));
 
@@ -141,7 +155,14 @@ app.patch('/api/clubs/:id/status', requireAdmin, async (req, res) => {
 
 app.get('/api/events', async (req, res) => {
   try {
+    const now = Date.now();
+    if (cacheStore.events && (now - cacheStore.lastUpdate.events < CACHE_TTL)) {
+      return res.json(cacheStore.events);
+    }
+
     const events = await Event.find().sort({ createdAt: -1 });
+    cacheStore.events = events;
+    cacheStore.lastUpdate.events = now;
     res.json(events);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -152,6 +173,7 @@ app.post('/api/events', async (req, res) => {
   try {
     const newEvent = new Event(req.body);
     await newEvent.save();
+    clearCache('events');
     res.status(201).json(newEvent);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -162,6 +184,7 @@ app.put('/api/events/:id', async (req, res) => {
   try {
     const updated = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!updated) return res.status(404).json({ error: 'Event not found' });
+    clearCache('events');
     res.json(updated);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -172,6 +195,7 @@ app.delete('/api/events/:id', async (req, res) => {
   try {
     const deleted = await Event.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ error: 'Event not found' });
+    clearCache('events');
     res.json({ message: 'Event deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -183,7 +207,14 @@ app.delete('/api/events/:id', async (req, res) => {
 
 app.get('/api/news', async (req, res) => {
   try {
+    const now = Date.now();
+    if (cacheStore.news && (now - cacheStore.lastUpdate.news < CACHE_TTL)) {
+      return res.json(cacheStore.news);
+    }
+
     const news = await News.find().sort({ createdAt: -1 });
+    cacheStore.news = news;
+    cacheStore.lastUpdate.news = now;
     res.json(news);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -194,6 +225,7 @@ app.post('/api/news', requireAdmin, async (req, res) => {
   try {
     const newNews = new News(req.body);
     await newNews.save();
+    clearCache('news');
     res.status(201).json(newNews);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -204,6 +236,7 @@ app.delete('/api/news/:id', requireAdmin, async (req, res) => {
   try {
     const deleted = await News.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ error: 'News item not found' });
+    clearCache('news');
     res.json({ message: 'News item deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
