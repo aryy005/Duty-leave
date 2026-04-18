@@ -425,6 +425,7 @@ function Dashboard({ token, onLogout }) {
                     title: form.title.value,
                     category: form.category.value,
                     content: form.content.value,
+                    isPopup: form.isPopup.checked,
                     date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
                   };
                   try {
@@ -459,6 +460,10 @@ function Dashboard({ token, onLogout }) {
                   <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                     <label>Content Details</label>
                     <textarea name="content" className="form-control" style={{ minHeight: '100px' }} required></textarea>
+                  </div>
+                  <div className="form-group" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <input name="isPopup" type="checkbox" id="news-is-popup" defaultChecked style={{ width: '18px', height: '18px' }} />
+                    <label htmlFor="news-is-popup" style={{ margin: 0, fontWeight: 500, cursor: 'pointer' }}>Show as prominent popup for students</label>
                   </div>
                   <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Broadcast to Students</button>
                 </form>
