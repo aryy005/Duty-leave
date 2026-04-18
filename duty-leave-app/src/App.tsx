@@ -348,6 +348,32 @@ function ClubDashboard({ events, currentClub, deleteEvent }) {
     }
   };
 
+  const exportToCSV = () => {
+    if (clubEvents.length === 0) return alert('No events to export.');
+    const headers = ['Date', 'Venue', 'Short Description', 'Status'];
+    const csvRows = [];
+    csvRows.push(headers.join(','));
+
+    clubEvents.forEach(event => {
+      const desc = `"${(event.description || '').replace(/"/g, '""')}"`;
+      const title = `"${(event.title || '').replace(/"/g, '""')}"`;
+      const venue = `"${(event.location || '').replace(/"/g, '""')}"`;
+      const status = `"${(event.status || 'Open').replace(/"/g, '""')}"`;
+      
+      csvRows.push([event.date, venue, desc, status].join(','));
+    });
+
+    const csvString = csvRows.join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `History_${currentClub.name.replace(/\s+/g, '_')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <main className="fade-in">
       <div className="glass-panel" style={{ padding: '2rem', borderRadius: '24px', marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -355,9 +381,14 @@ function ClubDashboard({ events, currentClub, deleteEvent }) {
           <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{currentClub.name} Portal</h1>
           <p className="text-muted">Manage your uploaded Duty Leaves and verify participants.</p>
         </div>
-        <Link to="/club/create" className="btn btn-primary">
-          <PlusCircle size={20} /> Upload New DL
-        </Link>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <button onClick={exportToCSV} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.05)' }}>
+            <Download size={20} /> Export History (Excel)
+          </button>
+          <Link to="/club/create" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <PlusCircle size={20} /> Upload New DL
+          </Link>
+        </div>
       </div>
 
       <h3 style={{ marginBottom: '1.5rem' }}>Events & Duty Leaves Issued</h3>
