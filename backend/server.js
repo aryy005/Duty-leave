@@ -18,30 +18,41 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // Health check
 app.get('/', (req, res) => res.json({ status: 'Duty Leave API is running 🚀' }));
 
-const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/duty-leave-hub';
 
-mongoose.connect(MONGO_URI)
-  .then(() => {
-    console.log('MongoDB successfully connected');
+// --- Improved MongoDB Connection ---
+mongoose.connect(MONGO_URI, {
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+})
+  .then(() => console.log('✅ MongoDB successfully connected'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
-    // --- Auto-delete events 4 days after their event date ---
-    // Runs every day at midnight (00:00)
-    cron.schedule('0 0 * * *', async () => {
-      try {
-        const cutoff = new Date();
-        cutoff.setDate(cutoff.getDate() - 4);
-        const result = await Event.deleteMany({ eventDate: { $lte: cutoff } });
-        if (result.deletedCount > 0) {
-          console.log(`[Cron] Auto-deleted ${result.deletedCount} expired event(s) (older than 4 days).`);
-        }
-      } catch (err) {
-        console.error('[Cron] Error during auto-delete:', err);
-      }
-    });
-    console.log('[Cron] Auto-delete scheduler started (runs daily at midnight).');
-  })
-  .catch(err => console.error('MongoDB connection error:', err));
+// Database Health Check
+app.get('/api/status', (req, res) => {
+  const status = {
+    uptime: process.uptime(),
+    message: 'OK',
+    timestamp: Date.now(),
+    db: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+    readyState: mongoose.connection.readyState
+  };
+  res.json(status);
+});
+
+// --- Auto-delete Cron ---
+cron.schedule('0 0 * * *', async () => {
+  try {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 4);
+    const result = await Event.deleteMany({ eventDate: { $lte: cutoff } });
+    if (result.deletedCount > 0) {
+      console.log(`[Cron] Auto-deleted ${result.deletedCount} expired event(s).`);
+    }
+  } catch (err) {
+    console.error('[Cron] Error:', err);
+  }
+});
 
 // --- Admin Auth Middleware ---
 

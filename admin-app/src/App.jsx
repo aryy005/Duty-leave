@@ -427,13 +427,21 @@ function Dashboard({ token, onLogout }) {
                     content: form.content.value,
                     date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
                   };
-                  const res = await fetch(`${API_BASE}/news`, {
-                    method: 'POST', headers: authHeaders, body: JSON.stringify(newItem)
-                  });
-                  if (res.ok) {
-                    const data = await res.json();
-                    setNews([data, ...news]);
-                    form.reset();
+                  try {
+                    const res = await fetch(`${API_BASE}/news`, {
+                      method: 'POST', headers: authHeaders, body: JSON.stringify(newItem)
+                    });
+                    if (res.ok) {
+                      const data = await res.json();
+                      setNews([data, ...news]);
+                      form.reset();
+                      alert('Broadcast successful! The latest news is now live for all students.');
+                    } else {
+                      const errData = await res.json();
+                      alert(`Broadcast failed: ${errData.error || 'Server error'}`);
+                    }
+                  } catch (err) {
+                    alert('Could not connect to the server. Please check your internet connection.');
                   }
                 }}>
                   <div className="form-group" style={{ marginBottom: '1rem' }}>

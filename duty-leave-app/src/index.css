@@ -853,3 +853,66 @@ textarea.form-control {
   font-weight: 600;
   font-size: 1.1rem;
 }
+
+/* Modal & Popup */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 10000;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(10px);
+}
+
+.modal-content {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.close-btn:hover {
+  background: rgba(225, 29, 72, 0.1);
+  color: var(--primary);
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.8rem 1.8rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+}
+
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-2px);
+}
