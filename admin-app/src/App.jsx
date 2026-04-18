@@ -115,6 +115,36 @@ function LoginScreen({ onLogin }) {
   );
 }
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const compressImage = (file, maxWidth = 900) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = (maxWidth / width) * height;
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Export to JPEG with 0.6 quality for maximum server efficiency
+        resolve(canvas.toDataURL('image/jpeg', 0.6));
+      };
+    };
+  });
+};
+
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 function Dashboard({ token, onLogout }) {
   const [clubs, setClubs] = useState([]);
@@ -219,12 +249,15 @@ function Dashboard({ token, onLogout }) {
     });
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setFormData({ ...formData, image: reader.result });
-      reader.readAsDataURL(file);
+      try {
+        const compressedBase64 = await compressImage(file);
+        setFormData({ ...formData, image: compressedBase64 });
+      } catch (err) {
+        console.error('Compression failed', err);
+      }
     }
   };
 

@@ -8,6 +8,35 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const AVAILABLE_STREAMS = ['All Streams', 'CSE', 'IT', 'Mech', 'Civil', 'BSc Physics', 'BSc Chemistry', 'BBA'];
 
+const compressImage = (file: File, maxWidth = 900): Promise<string> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = (maxWidth / width) * height;
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Export to JPEG with 0.6 quality for maximum server efficiency
+        resolve(canvas.toDataURL('image/jpeg', 0.6));
+      };
+    };
+  });
+};
+
 function Navbar({ role, currentClub }) {
   return (
     <header className="navbar glass-panel slide-down">
@@ -448,14 +477,15 @@ function CreateEvent({ addEvent, currentClub }) {
     });
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, image: reader.result });
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressedBase64 = await compressImage(file);
+        setFormData({ ...formData, image: compressedBase64 });
+      } catch (err) {
+        console.error('Compression failed', err);
+      }
     }
   };
 
@@ -625,12 +655,15 @@ function EditEvent({ events, updateEvent, currentClub }) {
     });
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setFormData(prev => ({ ...prev, image: reader.result }));
-      reader.readAsDataURL(file);
+      try {
+        const compressedBase64 = await compressImage(file);
+        setFormData(prev => prev ? { ...prev, image: compressedBase64 } : null);
+      } catch (err) {
+        console.error('Compression failed', err);
+      }
     }
   };
 
