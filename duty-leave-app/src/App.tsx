@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate, Navigate, useParams } from 'react-router-dom';
 import { Calendar, MapPin, Search, Clock, Users, ArrowRight, User, Building, LogIn, PlusCircle, Pencil, Trash2, X, Download } from 'lucide-react';
 import './index.css';
-import { About, Privacy, Terms, Contact, Footer } from './Pages';
+import { About, Privacy, Terms, Contact, Footer, News } from './Pages';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -37,6 +37,30 @@ const compressImage = (file: File, maxWidth = 900): Promise<string> => {
   });
 };
 
+const GoogleAd = ({ slot, style = { display: 'block', textAlign: 'center' } }) => {
+  useEffect(() => {
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch (e) {
+      console.warn('AdSense initialization error:', e);
+    }
+  }, []);
+
+  return (
+    <div className="glass-panel" style={{ margin: '2rem auto', padding: '1rem', overflow: 'hidden', minHeight: '100px', ...style }}>
+      <ins
+        className="adsbygoogle"
+        style={style}
+        data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" // Placeholder ID
+        data-ad-slot={slot}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      ></ins>
+      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Advertisement</div>
+    </div>
+  );
+};
+
 function Navbar({ role, currentClub }) {
   return (
     <header className="navbar glass-panel slide-down">
@@ -45,6 +69,7 @@ function Navbar({ role, currentClub }) {
         <div className="logo-text">DutyLeave Hub</div>
       </Link>
       <div className="nav-actions">
+        <Link to="/news" className="nav-link font-medium hover:text-primary transition-colors">News</Link>
         {role === 'student' && (
           <>
             <Link to="/" className="nav-link font-medium hover:text-primary transition-colors">Events Dashboard</Link>
@@ -269,11 +294,13 @@ function StudentApp({ events, approvedClubs }) {
   return (
     <>
       <Navbar role="student" />
+      <GoogleAd />
       <Routes>
         <Route path="/" element={<StudentDashboard events={events} approvedClubs={approvedClubs} />} />
         <Route path="/about" element={<About />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/news" element={<News />} />
         <Route path="/contact" element={<Contact />} />
       </Routes>
     </>
@@ -836,6 +863,7 @@ export default function App() {
           <Route path="/club/*" element={<ClubApp events={events} currentClub={currentClub} setCurrentClub={setCurrentClub} addEvent={addEvent} updateEvent={updateEvent} deleteEvent={deleteEvent} />} />
           <Route path="/*" element={<StudentApp events={events} approvedClubs={approvedClubs} />} />
         </Routes>
+        <GoogleAd slot="footer-auto-ad" style={{ maxWidth: '1000px', marginTop: '3rem' }} />
         <Footer />
       </div>
     </Router>
