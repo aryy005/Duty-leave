@@ -194,68 +194,106 @@ function StudentDashboard({ events, approvedClubs }) {
   };
 
   return (
-    <main className="fade-in-up">
-      <div className="dashboard-controls">
-        <div className="page-title">
-          <h1>Events Discover</h1>
-          <p>Discover upcoming events and duty leaves.</p>
+    <main className="fade-in-up" style={{ margin: '0 -2rem' }}>
+
+      {/* ── Hero Section ── */}
+      <section className="dl-hero">
+        <div className="dl-hero-circle1"></div>
+        <div className="dl-hero-circle2"></div>
+        <div className="dl-hero-logo">
+          <div className="dl-hero-crest"><span>DL</span></div>
+          <span className="dl-hero-name">DutyLeave Hub</span>
+        </div>
+        <div className="dl-hero-tag">Student Services Portal</div>
+        <h1>Duty Leaves &amp;<br />Campus Events</h1>
+        <p>Discover events and duty leaves issued by your college clubs and societies.</p>
+      </section>
+
+      {/* ── Stats Bar ── */}
+      <div className="dl-stats">
+        <div className="dl-stat-item">
+          <div className="dl-stat-num">{events.filter(e => getSmartStatus(e) === 'Open').length}</div>
+          <div className="dl-stat-lbl">Open Today</div>
+        </div>
+        <div className="dl-stat-item">
+          <div className="dl-stat-num">{events.filter(e => getSmartStatus(e) === 'Upcoming').length}</div>
+          <div className="dl-stat-lbl">Upcoming Events</div>
+        </div>
+        <div className="dl-stat-item">
+          <div className="dl-stat-num">{events.length}</div>
+          <div className="dl-stat-lbl">Total Duty Leaves</div>
+        </div>
+        <div className="dl-stat-item">
+          <div className="dl-stat-num">{approvedClubs.length}</div>
+          <div className="dl-stat-lbl">Active Clubs</div>
         </div>
       </div>
 
+      {/* ── Content Area ── */}
+      <div className="dl-content">
 
-      <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <Calendar size={20} className="text-primary" /> Discover All Duty Leaves
-      </h2>
-      <div className="filters-container glass-panel" style={{ padding: '1.5rem', borderRadius: '16px' }}>
-        <div className="filters-row">
-          <span className="filters-label">Status:</span>
-          {statusFilters.map(f => (
-            <button key={f} className={`filter-chip ${statusFilter === f ? 'active' : ''}`} onClick={() => setStatusFilter(f)}>
-              {f}
-            </button>
-          ))}
+        {/* Section Header */}
+        <div className="dl-section-hdr">
+          <h2><span className="dl-section-pill">Duty Leaves</span></h2>
+          <span style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 500 }}>
+            {filteredEvents.length} result{filteredEvents.length !== 1 ? 's' : ''} found
+          </span>
         </div>
-        <div className="filters-row" style={{ marginTop: '1rem' }}>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <span className="filters-label">Target Stream:</span>
-            <select className="select-input" value={streamFilter} onChange={(e) => setStreamFilter(e.target.value)}>
-              {AVAILABLE_STREAMS.map(stream => (
-                <option key={stream} value={stream}>{stream}</option>
-              ))}
-            </select>
-          </div>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginLeft: 'auto' }}>
-            <span className="filters-label">Organizing Society:</span>
-            <select className="select-input" value={clubFilter} onChange={(e) => setClubFilter(e.target.value)}>
-              <option value="All Clubs">All Clubs / Societies</option>
-              {approvedClubs.map(club => (
-                <option key={club._id} value={club.name}>{club.name}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
 
-      <div className="event-grid" style={{ marginTop: '1.5rem' }}>
-        {filteredEvents.length === 0 && (
-          <div className="empty-state glass-panel">
-            No events match your current filters.
+        {/* ── Filters ── */}
+        <div className="filters-container glass-panel" style={{ padding: '1.5rem', borderRadius: '16px', marginBottom: '1.5rem' }}>
+          <div className="filters-row">
+            <span className="filters-label">Status:</span>
+            {statusFilters.map(f => (
+              <button key={f} className={`filter-chip ${statusFilter === f ? 'active' : ''}`} onClick={() => setStatusFilter(f)}>
+                {f}
+              </button>
+            ))}
+          </div>
+          <div className="filters-row" style={{ marginTop: '1rem' }}>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <span className="filters-label">Target Stream:</span>
+              <select className="select-input" value={streamFilter} onChange={(e) => setStreamFilter(e.target.value)}>
+                {AVAILABLE_STREAMS.map(stream => (
+                  <option key={stream} value={stream}>{stream}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginLeft: 'auto' }}>
+              <span className="filters-label">Organizing Society:</span>
+              <select className="select-input" value={clubFilter} onChange={(e) => setClubFilter(e.target.value)}>
+                <option value="All Clubs">All Clubs / Societies</option>
+                {approvedClubs.map(club => (
+                  <option key={club._id} value={club.name}>{club.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Event Grid ── */}
+        <div className="event-grid">
+          {filteredEvents.length === 0 && (
+            <div className="empty-state glass-panel">
+              No events match your current filters.
+            </div>
+          )}
+          {filteredEvents.map(event => renderEventCard(event))}
+        </div>
+
+        {recentEvents.length > 0 && (
+          <div className="recent-section" style={{ marginTop: '4rem' }}>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
+              <Clock size={20} className="text-secondary" /> Recently Uploaded DLs
+            </h2>
+            <div className="event-grid">
+              {recentEvents.map(event => renderEventCard(event))}
+            </div>
           </div>
         )}
-        {filteredEvents.map(event => renderEventCard(event))}
       </div>
 
-      {recentEvents.length > 0 && (
-        <div className="recent-section" style={{ marginTop: '4rem' }}>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
-            <Clock size={20} className="text-secondary" /> Recently Uploaded DLs
-          </h2>
-          <div className="event-grid">
-            {recentEvents.map(event => renderEventCard(event))}
-          </div>
-        </div>
-      )}
-      
+      {/* ── Lightbox ── */}
       {isZoomed && selectedEvent && (
         <div className="lightbox" onClick={() => setIsZoomed(false)}>
           <button className="lightbox-close" style={{ position: 'fixed', top: '30px', right: '30px', background: 'white', color: 'black', border: 'none', borderRadius: '50%', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
@@ -264,7 +302,8 @@ function StudentDashboard({ events, approvedClubs }) {
           <img src={selectedEvent.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'} alt="Full poster" />
         </div>
       )}
-      
+
+      {/* ── Event Detail Modal ── */}
       {selectedEvent && (
         <div className="modal-overlay fade-in" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={(e) => {
           if (e.target === e.currentTarget) setSelectedEvent(null);
@@ -273,24 +312,24 @@ function StudentDashboard({ events, approvedClubs }) {
             <button onClick={() => setSelectedEvent(null)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'rgba(0,0,0,0.05)', color: 'var(--text-main)', border: 'none', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 11, transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.background='rgba(0,0,0,0.1)'} onMouseOut={e => e.currentTarget.style.background='rgba(0,0,0,0.05)'}>
               <X size={24} />
             </button>
-            
+
             <div className="modal-poster-side" onClick={() => setIsZoomed(true)}>
               <img src={selectedEvent.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'} alt={selectedEvent.title} />
               <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.6)', color: 'white', padding: '0.4rem 0.8rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 500, pointerEvents: 'none', backdropFilter: 'blur(4px)', opacity: 0.8 }}>
                 Click to expand image
               </div>
             </div>
-            
+
             <div className="modal-info-side">
               <div style={{ display: 'inline-block', alignSelf: 'flex-start', padding: '0.3rem 0.8rem', background: getSmartStatus(selectedEvent) === 'Open' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(225, 29, 72,0.1)', color: getSmartStatus(selectedEvent) === 'Open' ? '#10b981' : '#e11d48', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 700, marginBottom: '1rem' }}>
                 {getSmartStatus(selectedEvent) === 'Open' ? 'Live Today' : getSmartStatus(selectedEvent)}
               </div>
-              
+
               <h2 style={{ fontSize: '2rem', fontWeight: 800, margin: '0 0 0.25rem', color: 'var(--text-main)', letterSpacing: '-0.02em' }}>{selectedEvent.title}</h2>
               <p style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 600, fontSize: '1rem', marginBottom: '2rem' }}>
                 <Building size={18} /> {selectedEvent.society}
               </p>
-              
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2.5rem' }}>
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
                   <Calendar className="text-muted" size={20} style={{ marginTop: '2px' }} />
@@ -315,15 +354,15 @@ function StudentDashboard({ events, approvedClubs }) {
                   </div>
                 </div>
               </div>
-              
+
               <div style={{ flexGrow: 1, marginBottom: '2rem' }}>
                 <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.75rem' }}>About this Event</h4>
                 <p style={{ lineHeight: '1.6', color: 'var(--text-muted)', fontSize: '1rem' }}>{selectedEvent.description}</p>
               </div>
-              
+
               <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end', gap: '1rem', borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>
-                <button 
-                  className="btn btn-primary" 
+                <button
+                  className="btn btn-primary"
                   onClick={async () => {
                     const imgUrl = selectedEvent.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87';
                     try {
@@ -663,10 +702,44 @@ function CreateEvent({ addEvent, currentClub }) {
                 }}
               />
             </div>
-            <div className="form-group">
-              <label>Time</label>
-              <input type="text" placeholder="e.g., 09:00 AM - 12:00 PM" className="form-control" required
-                value={formData.time} onChange={e => setFormData({ ...formData, time: e.target.value })} />
+            <div className="form-group" style={{ gridColumn: 'span 2' }}>
+              <label>Event Time</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500, display: 'block', marginBottom: '0.4rem' }}>Start Time</span>
+                  <input
+                    type="time"
+                    className="form-control"
+                    required
+                    value={formData.time ? (() => { const p = formData.time.split(' – ')[0]; const [t, mer] = p.trim().split(' '); const [h, m] = t.split(':'); const hr = mer === 'PM' && h !== '12' ? String(+h + 12) : (mer === 'AM' && h === '12' ? '00' : h.padStart(2,'0')); return `${hr}:${m}`; })() : ''}
+                    onChange={e => {
+                      const [h, m] = e.target.value.split(':');
+                      const hr = parseInt(h); const ampm = hr >= 12 ? 'PM' : 'AM';
+                      const h12 = hr % 12 === 0 ? 12 : hr % 12;
+                      const startStr = `${String(h12).padStart(2,'0')}:${m} ${ampm}`;
+                      const endPart = formData.time?.split(' – ')[1] || '';
+                      setFormData({ ...formData, time: endPart ? `${startStr} – ${endPart}` : startStr });
+                    }}
+                  />
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500, display: 'block', marginBottom: '0.4rem' }}>End Time</span>
+                  <input
+                    type="time"
+                    className="form-control"
+                    value={formData.time?.includes(' – ') ? (() => { const p = formData.time.split(' – ')[1]; const [t, mer] = p.trim().split(' '); const [h, m] = t.split(':'); const hr = mer === 'PM' && h !== '12' ? String(+h + 12) : (mer === 'AM' && h === '12' ? '00' : h.padStart(2,'0')); return `${hr}:${m}`; })() : ''}
+                    onChange={e => {
+                      const [h, m] = e.target.value.split(':');
+                      const hr = parseInt(h); const ampm = hr >= 12 ? 'PM' : 'AM';
+                      const h12 = hr % 12 === 0 ? 12 : hr % 12;
+                      const endStr = `${String(h12).padStart(2,'0')}:${m} ${ampm}`;
+                      const startPart = formData.time?.split(' – ')[0] || '';
+                      setFormData({ ...formData, time: startPart ? `${startPart} – ${endStr}` : endStr });
+                    }}
+                  />
+                </div>
+              </div>
+              {formData.time && <p style={{ fontSize: '0.8rem', color: 'var(--primary)', marginTop: '0.5rem', fontWeight: 500 }}>⏰ {formData.time}</p>}
             </div>
             <div className="form-group">
               <label>Status</label>
@@ -837,10 +910,44 @@ function EditEvent({ events, updateEvent, currentClub }) {
                 }}
               />
             </div>
-            <div className="form-group">
-              <label>Time</label>
-              <input type="text" placeholder="e.g., 09:00 AM - 12:00 PM" className="form-control" required
-                value={formData.time} onChange={e => setFormData({ ...formData, time: e.target.value })} />
+            <div className="form-group" style={{ gridColumn: 'span 2' }}>
+              <label>Event Time</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500, display: 'block', marginBottom: '0.4rem' }}>Start Time</span>
+                  <input
+                    type="time"
+                    className="form-control"
+                    required
+                    value={formData.time ? (() => { const p = formData.time.split(' – ')[0]; const [t, mer] = p.trim().split(' '); if (!t || !mer) return ''; const [h, m] = t.split(':'); const hr = mer === 'PM' && h !== '12' ? String(+h + 12) : (mer === 'AM' && h === '12' ? '00' : h.padStart(2,'0')); return `${hr}:${m}`; })() : ''}
+                    onChange={e => {
+                      const [h, m] = e.target.value.split(':');
+                      const hr = parseInt(h); const ampm = hr >= 12 ? 'PM' : 'AM';
+                      const h12 = hr % 12 === 0 ? 12 : hr % 12;
+                      const startStr = `${String(h12).padStart(2,'0')}:${m} ${ampm}`;
+                      const endPart = formData.time?.split(' – ')[1] || '';
+                      setFormData({ ...formData, time: endPart ? `${startStr} – ${endPart}` : startStr });
+                    }}
+                  />
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500, display: 'block', marginBottom: '0.4rem' }}>End Time</span>
+                  <input
+                    type="time"
+                    className="form-control"
+                    value={formData.time?.includes(' – ') ? (() => { const p = formData.time.split(' – ')[1]; const [t, mer] = p.trim().split(' '); if (!t || !mer) return ''; const [h, m] = t.split(':'); const hr = mer === 'PM' && h !== '12' ? String(+h + 12) : (mer === 'AM' && h === '12' ? '00' : h.padStart(2,'0')); return `${hr}:${m}`; })() : ''}
+                    onChange={e => {
+                      const [h, m] = e.target.value.split(':');
+                      const hr = parseInt(h); const ampm = hr >= 12 ? 'PM' : 'AM';
+                      const h12 = hr % 12 === 0 ? 12 : hr % 12;
+                      const endStr = `${String(h12).padStart(2,'0')}:${m} ${ampm}`;
+                      const startPart = formData.time?.split(' – ')[0] || '';
+                      setFormData({ ...formData, time: startPart ? `${startPart} – ${endStr}` : endStr });
+                    }}
+                  />
+                </div>
+              </div>
+              {formData.time && <p style={{ fontSize: '0.8rem', color: 'var(--primary)', marginTop: '0.5rem', fontWeight: 500 }}>⏰ {formData.time}</p>}
             </div>
             <div className="form-group">
               <label>Status</label>

@@ -1051,8 +1051,187 @@ textarea.form-control {
     max-height: 95vh;
     overflow-y: auto;
   }
-  
+
   .modal-poster-side {
     height: 400px;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   Student Dashboard — University Portal Theme
+═══════════════════════════════════════════ */
+
+/* Hero */
+.dl-hero {
+  background: #C8102E;
+  padding: 2.5rem 2rem 3.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.dl-hero-circle1 {
+  position: absolute;
+  right: -50px;
+  top: -50px;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  border: 55px solid rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+.dl-hero-circle2 {
+  position: absolute;
+  right: 90px;
+  bottom: -80px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  border: 45px solid rgba(255, 255, 255, 0.04);
+  pointer-events: none;
+}
+
+.dl-hero-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.dl-hero-crest {
+  width: 42px;
+  height: 42px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dl-hero-crest span {
+  color: #C8102E;
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: -0.5px;
+}
+
+.dl-hero-name {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.dl-hero-tag {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+}
+
+.dl-hero h1 {
+  color: #ffffff;
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 800;
+  line-height: 1.2;
+  max-width: 500px;
+  margin-bottom: 0.6rem;
+  letter-spacing: -0.02em;
+}
+
+.dl-hero p {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 14px;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+/* Stats Bar */
+.dl-stats {
+  background: #9B0B21;
+  display: flex;
+}
+
+.dl-stat-item {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  text-align: center;
+}
+
+.dl-stat-item:last-child {
+  border-right: none;
+}
+
+.dl-stat-num {
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.dl-stat-lbl {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  margin-top: 2px;
+}
+
+/* Content area (below hero + stats) */
+.dl-content {
+  padding: 2rem;
+}
+
+/* Section header row */
+.dl-section-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.dl-section-hdr h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Red pill badge */
+.dl-section-pill {
+  display: inline-block;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-right: 6px;
+}
+
+/* Responsive: stack stats on narrow screens */
+@media (max-width: 600px) {
+  .dl-stats {
+    flex-wrap: wrap;
+  }
+
+  .dl-stat-item {
+    flex: 1 1 50%;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .dl-hero h1 {
+    font-size: 26px;
+  }
+
+  .dl-content {
+    padding: 1.5rem 1rem;
   }
 }

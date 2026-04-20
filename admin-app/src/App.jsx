@@ -588,9 +588,44 @@ function Dashboard({ token, onLogout }) {
                       setFormData({ ...formData, eventDate: e.target.value, date: display });
                     }} />
                   </div>
-                  <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Time</label>
-                    <input type="text" placeholder="e.g., 09:00 AM - 12:00 PM" className="form-control" required value={formData.time} onChange={e => setFormData({ ...formData, time: e.target.value })} />
+                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Event Time</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <div>
+                        <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 500, display: 'block', marginBottom: '0.4rem' }}>Start Time</span>
+                        <input
+                          type="time"
+                          className="form-control"
+                          required
+                          value={formData.time ? (() => { const p = formData.time.split(' – ')[0]; const [t, mer] = p.trim().split(' '); if (!t || !mer) return ''; const [h, m] = t.split(':'); const hr = mer === 'PM' && h !== '12' ? String(+h + 12) : (mer === 'AM' && h === '12' ? '00' : h.padStart(2,'0')); return `${hr}:${m}`; })() : ''}
+                          onChange={e => {
+                            const [h, m] = e.target.value.split(':');
+                            const hr = parseInt(h); const ampm = hr >= 12 ? 'PM' : 'AM';
+                            const h12 = hr % 12 === 0 ? 12 : hr % 12;
+                            const startStr = `${String(h12).padStart(2,'0')}:${m} ${ampm}`;
+                            const endPart = formData.time?.split(' – ')[1] || '';
+                            setFormData({ ...formData, time: endPart ? `${startStr} – ${endPart}` : startStr });
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 500, display: 'block', marginBottom: '0.4rem' }}>End Time</span>
+                        <input
+                          type="time"
+                          className="form-control"
+                          value={formData.time?.includes(' – ') ? (() => { const p = formData.time.split(' – ')[1]; const [t, mer] = p.trim().split(' '); if (!t || !mer) return ''; const [h, m] = t.split(':'); const hr = mer === 'PM' && h !== '12' ? String(+h + 12) : (mer === 'AM' && h === '12' ? '00' : h.padStart(2,'0')); return `${hr}:${m}`; })() : ''}
+                          onChange={e => {
+                            const [h, m] = e.target.value.split(':');
+                            const hr = parseInt(h); const ampm = hr >= 12 ? 'PM' : 'AM';
+                            const h12 = hr % 12 === 0 ? 12 : hr % 12;
+                            const endStr = `${String(h12).padStart(2,'0')}:${m} ${ampm}`;
+                            const startPart = formData.time?.split(' – ')[0] || '';
+                            setFormData({ ...formData, time: startPart ? `${startPart} – ${endStr}` : endStr });
+                          }}
+                        />
+                      </div>
+                    </div>
+                    {formData.time && <p style={{ fontSize: '0.8rem', color: 'var(--primary)', marginTop: '0.5rem', fontWeight: 500 }}>⏰ {formData.time}</p>}
                   </div>
                   <div className="form-group">
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Status</label>
